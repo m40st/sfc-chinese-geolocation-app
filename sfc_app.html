@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SFC 中国語フレーズ学習</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;background:#000000;color:#ffffff;min-height:100vh;overflow-x:hidden;line-height:1.5;}
+.screen{display:none;flex-direction:column;align-items:center;min-height:100vh;}
+.screen.active{display:flex;}
+
+/* ===== MAP ===== */
+#s-map{justify-content:flex-start;padding:0;}
+.map-header{width:100%;padding:14px 16px 10px;background:linear-gradient(180deg,#000000 60%,transparent);position:sticky;top:0;z-index:10;}
+.map-title{font-size:1.05rem;font-weight:700;margin-bottom:6px;}
+.badges{display:flex;flex-wrap:wrap;gap:6px;}
+.badge{font-size:.875rem;font-weight:700;padding:3px 10px;border-radius:4px;}
+.b-area{background:#111a2e;color:#80aaff;}
+.b-approaching{background:rgba(44,182,125,.18);color:#2cb67d;border:1px solid #2cb67d;}
+.b-indoor{background:rgba(127,90,240,.18);color:#9980f2;border:1px solid #9980f2;}
+.b-outdoor{background:rgba(255,137,6,.15);color:#ff8906;border:1px solid #ff8906;}
+.b-departing{background:rgba(239,69,101,.15);color:#ef4565;border:1px solid #ef4565;}
+.b-qzss{background:rgba(44,182,125,.1);color:#2cb67d;}
+.b-gps{background:rgba(255,137,6,.1);color:#ff8906;}
+.b-wait{background:rgba(200,200,200,.1);color:#aaaaaa;}
+#svgWrap{width:100%;max-width:600px;margin:0 auto;}
+#svgWrap svg{width:100%;display:block;}
+.map-footer{width:100%;padding:12px 16px 28px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.info-box{width:100%;max-width:540px;background:#111111;border-radius:8px;padding:12px 16px;font-size:.875rem;color:#aaaaaa;text-align:center;line-height:1.5;border:1px solid #222222;}
+.info-box strong{color:#ffffff;}
+.btn-start{width:100%;max-width:540px;padding:15px;background:#7f5af0;color:#fff;border:none;border-radius:4px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s;}
+.btn-start:hover:not(:disabled){background:#6b46e0;}
+.btn-start:disabled{background:#1a1a1a;color:#555555;cursor:default;}
+.map-nav{display:flex;gap:10px;width:100%;max-width:540px;}
+.btn-nav{flex:1;padding:10px;background:#111111;border:1px solid #333333;color:#aaaaaa;border-radius:4px;font-size:.875rem;cursor:pointer;transition:.2s;}
+.btn-nav:hover{border-color:#7f5af0;color:#ffffff;}
+
+/* ===== PRACTICE ===== */
+#s-practice{justify-content:center;padding:20px 16px;}
+.p-header{width:100%;max-width:520px;display:flex;justify-content:space-between;margin-bottom:14px;font-size:.875rem;color:#aaaaaa;}
+.p-card{background:#111111;border-radius:8px;padding:32px 24px 22px;width:100%;max-width:520px;text-align:center;margin-bottom:12px;border:1px solid #222222;}
+.p-state{display:inline-block;font-size:.875rem;font-weight:700;padding:3px 10px;border-radius:4px;margin-bottom:12px;}
+.p-zh{font-size:1.55rem;font-weight:700;line-height:1.4;margin-bottom:10px;}
+.p-ja{font-size:.875rem;color:#777777;margin-bottom:8px;}
+.p-pinyin{font-size:1.4rem;font-style:italic;min-height:2rem;margin-bottom:6px;transition:.3s;}
+.p-pinyin.ok{color:#2cb67d;}
+.p-pinyin.ng{color:#ff8906;}
+.p-status{font-size:.875rem;min-height:1.8rem;padding:6px 12px;border-radius:4px;margin-top:6px;transition:.3s;}
+.p-status.idle{color:#555555;}
+.p-status.listening{color:#9980f2;background:rgba(127,90,240,.1);}
+.p-status.ok{color:#2cb67d;background:rgba(44,182,125,.1);}
+.p-status.ng{color:#ff8906;background:rgba(255,137,6,.1);}
+.p-recog{font-size:.875rem;color:#555555;min-height:1.1rem;margin-top:3px;}
+.btn-row{display:flex;gap:10px;width:100%;max-width:520px;}
+.btn-mic{flex:1;padding:14px;background:#7f5af0;color:#fff;border:none;border-radius:4px;font-size:.875rem;font-weight:700;cursor:pointer;transition:.2s;}
+.btn-mic:hover{background:#6b46e0;}
+.btn-mic.rec{background:#ef4565;animation:pulse 1.2s infinite;}
+.btn-next{flex:1;padding:14px;background:#2cb67d;color:#fff;border:none;border-radius:4px;font-size:.875rem;font-weight:700;cursor:pointer;transition:.2s;}
+.btn-next:hover{background:#249f60;}
+.btn-abort{background:transparent;border:1px solid #333333;color:#aaaaaa;font-size:.875rem;padding:8px 18px;border-radius:4px;cursor:pointer;margin-top:8px;transition:.2s;}
+.btn-abort:hover{border-color:#ef4565;color:#ef4565;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,69,101,.4);}50%{box-shadow:0 0 0 12px rgba(239,69,101,0);}}
+
+/* ===== RESULT ===== */
+#s-result{justify-content:center;padding:20px 16px;}
+.r-title{font-size:.95rem;color:#aaaaaa;margin-bottom:14px;text-align:center;}
+.r-card{background:#111111;border-radius:8px;padding:34px;width:100%;max-width:380px;text-align:center;margin-bottom:18px;border:1px solid #222222;}
+.r-big{font-size:4.5rem;font-weight:700;line-height:1;margin-bottom:4px;}
+.r-denom{font-size:1.1rem;color:#aaaaaa;margin-bottom:12px;}
+.r-rate{font-size:1.7rem;font-weight:700;margin-bottom:5px;}
+.r-comment{font-size:.875rem;color:#aaaaaa;}
+.r-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:380px;}
+.btn-retry{background:#7f5af0;color:#fff;padding:13px;border:none;border-radius:4px;font-size:.875rem;font-weight:700;cursor:pointer;}
+.btn-retry:hover{background:#6b46e0;}
+.btn-wrong{background:#ef4565;color:#fff;padding:13px;border:none;border-radius:4px;font-size:.875rem;font-weight:700;cursor:pointer;}
+.btn-wrong:hover{background:#d02040;}
+.btn-home{background:#111111;color:#aaaaaa;padding:11px;border:1px solid #333333;border-radius:4px;font-size:.875rem;cursor:pointer;}
+.btn-home:hover{border-color:#aaaaaa;color:#fff;}
+
+/* ===== SCROLL SCREENS ===== */
+#s-history,#s-phrases{justify-content:flex-start;padding:0;}
+.sc-header{position:sticky;top:0;z-index:10;background:#000000;border-bottom:1px solid #222222;width:100%;padding:12px 18px;}
+.sc-htop{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.sc-title{font-size:1rem;font-weight:700;}
+.btn-close{background:none;border:none;color:#9980f2;font-size:.875rem;cursor:pointer;}
+.sc-sub{font-size:.875rem;color:#555555;}
+.sc-body{width:100%;max-width:600px;padding:14px 18px 56px;}
+
+/* history */
+.h-item{background:#111111;border-radius:8px;padding:13px 16px;margin-bottom:8px;border:1px solid #222222;}
+.h-r1{display:flex;justify-content:space-between;margin-bottom:4px;}
+.h-area{font-size:.9rem;font-weight:700;}
+.h-score{font-size:.9rem;font-weight:700;}
+.h-r2{display:flex;gap:10px;font-size:.875rem;color:#aaaaaa;}
+.h-empty{text-align:center;color:#555555;padding:40px 0;font-size:.875rem;}
+
+/* phrase list */
+.ph-bld{font-size:.875rem;font-weight:700;letter-spacing:.05em;padding:13px 0 4px;border-bottom:1px solid #222222;margin-top:4px;color:#9980f2;}
+.ph-st{font-size:.875rem;color:#555555;padding:7px 0 2px;}
+.ph-item{display:flex;align-items:flex-start;gap:8px;padding:7px 4px;border-radius:4px;transition:background .15s;}
+.ph-item:hover{background:#111111;}
+.ph-item.wrong{background:rgba(255,137,6,.06);}
+.ph-mark{font-size:.875rem;flex-shrink:0;margin-top:2px;width:16px;}
+.ph-zh{font-size:.97rem;font-weight:700;}
+.ph-py{font-size:.875rem;font-style:italic;color:#9980f2;}
+.ph-ja{font-size:.875rem;color:#aaaaaa;}
+</style>
+</head>
+<body>
+
+<!-- ① MAP SCREEN -->
+<div id="s-map" class="screen active">
+  <div class="map-header">
+    <div class="map-title">SFC 中国語フレーズ学習</div>
+    <div class="badges">
+      <span class="badge b-area" id="bArea">位置情報を取得中...</span>
+      <span class="badge" id="bState" style="display:none"></span>
+      <span class="badge" id="bAcc" style="display:none"></span>
+    </div>
+  </div>
+
+  <div id="svgWrap">
+  <svg viewBox="0 0 560 420" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- 背景 -->
+    <rect width="560" height="420" fill="#000000"/>
+
+    <!-- キャンパス敷地 -->
+    <ellipse cx="280" cy="210" rx="258" ry="196" fill="#090909" stroke="#1e1e1e" stroke-width="1.5"/>
+
+    <!-- 方位記号：Γ館（体育館・右上）が北 -->
+    <text x="452" y="76" fill="#444444" font-size="9" font-weight="bold">N▲</text>
+
+    <!-- 北門 -->
+    <line x1="438" y1="30" x2="528" y2="30" stroke="#2a2a2a" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="448" y="27" fill="#444444" font-size="8">北門</text>
+
+    <!-- τ館（ο真上） -->
+    <rect id="b-tau" data-bid="tau" x="308" y="28" width="50" height="46" rx="3"
+          fill="#141414" stroke="#383838" stroke-width="2"/>
+    <text x="333" y="53" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="bold">τ館</text>
+    <text x="333" y="67" text-anchor="middle" fill="#555555" font-size="7">大学院棟</text>
+
+    <!-- Ψ・Φ館（τの右） -->
+    <rect x="368" y="36" width="48" height="32" rx="3" fill="#111111" stroke="#2a2a2a" stroke-width="1.2"/>
+    <text x="392" y="56" text-anchor="middle" fill="#888888" font-size="10">Ψ・Φ館</text>
+
+    <!-- Δ館（旧弓道場位置） -->
+    <rect x="256" y="26" width="46" height="34" rx="3" fill="#111111" stroke="#2a2a2a" stroke-width="1.4"/>
+    <text x="279" y="47" text-anchor="middle" fill="#ffffff" font-size="14">Δ館</text>
+
+    <!-- 鴨池（左） -->
+    <ellipse id="b-pond" data-bid="pond" cx="100" cy="170" rx="58" ry="46"
+             fill="#07090b" stroke="#1c2022" stroke-width="1.5"/>
+    <text x="100" y="167" text-anchor="middle" fill="#888888" font-size="11" font-weight="bold">鴨池</text>
+    <text x="100" y="180" text-anchor="middle" fill="#444444" font-size="7">ガリバー池</text>
+
+    <!-- Σ館（鴨池の真上） -->
+    <rect id="b-sigma" data-bid="sigma" x="58" y="82" width="84" height="52" rx="3"
+          fill="#181818" stroke="#404040" stroke-width="2.2"/>
+    <text x="100" y="107" text-anchor="middle" fill="#ffffff" font-size="15" font-weight="bold">Σ館</text>
+    <text x="100" y="122" text-anchor="middle" fill="#555555" font-size="7">食堂・購買・コンビニ</text>
+
+    <!-- κ・ε・ι・ο（Σ右横に横並び） -->
+    <rect id="b-lecture" data-bid="lecture" x="154" y="84" width="46" height="34" rx="3"
+          fill="#141414" stroke="#303030" stroke-width="1.6"/>
+    <text x="177" y="105" text-anchor="middle" fill="#ffffff" font-size="14">κ</text>
+
+    <rect x="206" y="84" width="46" height="34" rx="3" fill="#141414" stroke="#2a2a2a" stroke-width="1.2"/>
+    <text x="229" y="105" text-anchor="middle" fill="#ffffff" font-size="14">ε</text>
+
+    <rect x="258" y="84" width="46" height="34" rx="3" fill="#141414" stroke="#2a2a2a" stroke-width="1.2"/>
+    <text x="281" y="105" text-anchor="middle" fill="#ffffff" font-size="14">ι</text>
+
+    <rect x="310" y="84" width="46" height="34" rx="3" fill="#141414" stroke="#2a2a2a" stroke-width="1.2"/>
+    <text x="333" y="105" text-anchor="middle" fill="#ffffff" font-size="14">ο</text>
+
+    <!-- Μ館（ε・ι真下・中央） -->
+    <rect id="b-mu" data-bid="mu" x="206" y="130" width="90" height="74" rx="3"
+          fill="#181818" stroke="#404040" stroke-width="2"/>
+    <text x="251" y="164" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="bold">Μ館</text>
+    <text x="251" y="179" text-anchor="middle" fill="#555555" font-size="7">メディアセンター</text>
+    <text x="251" y="191" text-anchor="middle" fill="#555555" font-size="7">（図書館）</text>
+
+    <!-- 学生ラウンジ（Ωの左上） -->
+    <rect x="134" y="178" width="66" height="36" rx="3"
+          fill="#111111" stroke="#2a2a2a" stroke-width="1.6"/>
+    <text x="167" y="192" text-anchor="middle" fill="#aaaaaa" font-size="8" font-weight="bold">学生ラウンジ</text>
+    <text x="167" y="204" text-anchor="middle" fill="#555555" font-size="7">サブウェイ・鴨池テラス</text>
+
+    <!-- Ω館（Μ下・左） -->
+    <rect x="178" y="216" width="66" height="60" rx="3"
+          fill="#141414" stroke="#303030" stroke-width="1.8"/>
+    <text x="211" y="250" text-anchor="middle" fill="#ffffff" font-size="14" font-weight="bold">Ω館</text>
+
+    <!-- Α館（Ω右） -->
+    <rect id="b-alpha" data-bid="alpha" x="252" y="216" width="76" height="68" rx="3"
+          fill="#1a1a1a" stroke="#444444" stroke-width="2.5"/>
+    <text x="290" y="251" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="bold">Α館</text>
+    <text x="290" y="266" text-anchor="middle" fill="#555555" font-size="7">本館・学事</text>
+    <text x="290" y="276" text-anchor="middle" fill="#555555" font-size="7">ウェルネス</text>
+
+    <!-- λ館（Θ真上） -->
+    <rect x="344" y="128" width="46" height="36" rx="3"
+          fill="#141414" stroke="#2a2a2a" stroke-width="1.4"/>
+    <text x="367" y="150" text-anchor="middle" fill="#ffffff" font-size="14">λ館</text>
+
+    <!-- Θ館（Αのななめ右上） -->
+    <rect x="344" y="174" width="46" height="34" rx="3"
+          fill="#141414" stroke="#2a2a2a" stroke-width="1.4"/>
+    <text x="367" y="195" text-anchor="middle" fill="#ffffff" font-size="14">Θ館</text>
+
+    <!-- Γ館（右・体育館）← 北側 -->
+    <rect id="b-gamma" data-bid="gamma" x="440" y="84" width="40" height="96" rx="3"
+          fill="#0f130f" stroke="#2a3e2a" stroke-width="1.8"/>
+    <text x="460" y="130" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="bold">Γ館</text>
+    <text x="460" y="144" text-anchor="middle" fill="#557755" font-size="7">体育館</text>
+
+    <!-- 看護医療（敷地外・点線） -->
+    <rect x="490" y="196" width="40" height="55" rx="3"
+          fill="#0a0a0a" stroke="#252525" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="510" y="218" text-anchor="middle" fill="#444444" font-size="7">看護</text>
+    <text x="510" y="230" text-anchor="middle" fill="#444444" font-size="7">医療</text>
+    <text x="510" y="242" text-anchor="middle" fill="#333333" font-size="6">※別棟</text>
+
+    <!-- βヴィレッジ（下右） -->
+    <rect id="b-beta" data-bid="beta" x="390" y="268" width="78" height="58" rx="3"
+          fill="#181818" stroke="#404040" stroke-width="1.8"/>
+    <text x="429" y="295" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="bold">β</text>
+    <text x="429" y="310" text-anchor="middle" fill="#555555" font-size="8">ヴィレッジ</text>
+
+    <!-- バス停A・B（Ωのだいぶ下） -->
+    <rect id="b-bus" data-bid="bus" x="148" y="348" width="100" height="36" rx="4"
+          fill="#141414" stroke="#3a3a3a" stroke-width="2"/>
+    <text x="198" y="370" text-anchor="middle" fill="#aaaaaa" font-size="10" font-weight="bold">バス停 A・B</text>
+
+    <!-- τ→ο 補助線 -->
+    <line x1="333" y1="74" x2="333" y2="84" stroke="#222222" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"/>
+
+    <!-- 現在地ピン（初期位置は画面外） -->
+    <circle id="pin-ring" cx="-200" cy="-200" r="18" fill="none" stroke="#2cb67d" stroke-width="2" opacity="0.3">
+      <animate attributeName="r" values="18;32;18" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle id="pin-dot" cx="-200" cy="-200" r="7" fill="#2cb67d"/>
+  </svg>
+  </div>
+
+  <div class="map-footer">
+    <div class="info-box" id="infoBox">GPSを起動中です。屋外に出てしばらくお待ちください。</div>
+    <div id="debugCoords" style="font-size:11px;color:#888;text-align:center;padding:4px 0;font-family:monospace;">座標取得中...</div>
+    <button class="btn-start" id="btnStart" onclick="startSession()" disabled>フレーズ練習を始める</button>
+    <div class="map-nav">
+      <button class="btn-nav" onclick="showScreen('s-phrases')">フレーズ一覧</button>
+      <button class="btn-nav" onclick="goHistory()">学習履歴</button>
+    </div>
+  </div>
+</div>
+
+<!-- ② PRACTICE SCREEN -->
+<div id="s-practice" class="screen">
+  <div class="p-header">
+    <span id="pArea"></span>
+    <span id="pCounter"></span>
+  </div>
+  <div class="p-card">
+    <div><span class="p-state" id="pStateTag"></span></div>
+    <div class="p-zh" id="pZh"></div>
+    <div class="p-ja" id="pJa"></div>
+    <div class="p-pinyin" id="pPinyin"></div>
+    <div class="p-status idle" id="pStatus">マイクボタンを押して発音してください</div>
+    <div class="p-recog" id="pRecog"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-mic" id="btnMic" onclick="doRecog()">発音する</button>
+    <button class="btn-next" id="btnNext" onclick="nextPhrase()" style="display:none">次へ →</button>
+  </div>
+  <button class="btn-abort" onclick="showScreen('s-map')">中断してホームへ戻る</button>
+</div>
+
+<!-- ③ RESULT SCREEN -->
+<div id="s-result" class="screen">
+  <p class="r-title" id="rTitle"></p>
+  <div class="r-card">
+    <div class="r-big" id="rBig"></div>
+    <div class="r-denom" id="rDenom"></div>
+    <div class="r-rate" id="rRate"></div>
+    <div class="r-comment" id="rComment"></div>
+  </div>
+  <div class="r-btns">
+    <button class="btn-retry" onclick="retrySession()">もう一度練習する</button>
+    <button class="btn-wrong" id="btnWrong" onclick="practiceWrong()">間違えたフレーズだけ練習</button>
+    <button class="btn-home" onclick="showScreen('s-map')">← ホームへ</button>
+  </div>
+</div>
+
+<!-- ④ HISTORY SCREEN -->
+<div id="s-history" class="screen">
+  <div class="sc-header">
+    <div class="sc-htop">
+      <span class="sc-title">学習履歴</span>
+      <button class="btn-close" onclick="showScreen('s-map')">← 戻る</button>
+    </div>
+    <span class="sc-sub" id="hStats"></span>
+  </div>
+  <div class="sc-body" id="hBody"></div>
+</div>
+
+<!-- ⑤ PHRASE LIST SCREEN -->
+<div id="s-phrases" class="screen">
+  <div class="sc-header">
+    <div class="sc-htop">
+      <span class="sc-title">フレーズ一覧</span>
+      <button class="btn-close" onclick="showScreen('s-map')">← 戻る</button>
+    </div>
+    <span class="sc-sub">全エリア・全フレーズ</span>
+  </div>
+  <div class="sc-body" id="phBody"></div>
+</div>
+
+<script>
+// ============================================================
+// DATA: 建物
+// ============================================================
+const BUILDINGS = [
+  {id:"bus",    name:"バス停A・B",                lat:35.3870,lng:139.4255,r:80, indoor:false},
+  {id:"mu",     name:"Μ館（メディアセンター）",   lat:35.3884,lng:139.4256,r:70, indoor:true},
+  {id:"alpha",  name:"Α館",                       lat:35.3876,lng:139.4278,r:70, indoor:true},
+  {id:"sigma",  name:"Σ館",                       lat:35.3882,lng:139.4266,r:75, indoor:true},
+  {id:"lecture",name:"講義棟（κ・ε・ι・ο・λ・Θ）",lat:35.3886,lng:139.4274,r:95, indoor:true},
+  {id:"tau",    name:"τ館",                       lat:35.3905,lng:139.4275,r:65, indoor:true},
+  {id:"gamma",  name:"Γ館（体育館）",              lat:35.3895,lng:139.4285,r:65, indoor:true},
+  {id:"beta",   name:"βヴィレッジ",               lat:35.3876,lng:139.4285,r:70, indoor:true},
+  {id:"pond",   name:"鴨池・学生ラウンジ",          lat:35.3897,lng:139.4264,r:80, indoor:false},
+];
+
+// キャンパス全体の境界（建物未検出時の判定用）
+const CAMPUS_CENTER = {lat:35.3888, lng:139.4270};
+const CAMPUS_R = 420; // meters（敷地全体をカバー）
+
+function isOnCampus(lat,lng){
+  return haversine(lat,lng,CAMPUS_CENTER.lat,CAMPUS_CENTER.lng) < CAMPUS_R;
+}
+
+// SVG座標変換（GPS→SVG px）
+const GPS0 = {lat:35.3870, lng:139.4255};
+const SVG0 = {x:198, y:366};
+const LPL  = 62647;  // px per degree lat
+const LPLg = 144782; // px per degree lng
+
+function g2s(lat,lng){
+  return {x: SVG0.x+(lng-GPS0.lng)*LPLg, y: SVG0.y-(lat-GPS0.lat)*LPL};
+}
+
+// ============================================================
+// DATA: フレーズ
+// ============================================================
+const PH = {
+  bus:{
+    approaching:[
+      {zh:"我快要迟到了。",py:"Wǒ kuàiyào chídào le.",ja:"授業に遅刻しそうだ。",k:["迟到"]},
+      {zh:"今天的考试怎么办…",py:"Jīntiān de kǎoshì zěnme bàn…",ja:"今日のテスト、どうしよう…",k:["考试","怎么办"]},
+      {zh:"糟了，我的公交卡没钱了。",py:"Zāo le, wǒ de gōngjiāo kǎ méi qián le.",ja:"やばい、交通カードの残高がない。",k:["公交卡","没钱"]},
+    ],
+    outdoor:[
+      {zh:"请问，食堂在哪里？",py:"Qǐngwèn, shítáng zài nǎlǐ?",ja:"すみません、食堂はどこですか？",k:["食堂","哪里"]},
+      {zh:"公交车开得太慢了。",py:"Gōngjiāochē kāi de tài màn le.",ja:"バスの速度が遅すぎる。",k:["公交车","太慢"]},
+      {zh:"不好意思，我用现金付款。",py:"Bù hǎoyìsi, wǒ yòng xiànjīn fùkuǎn.",ja:"すみません、現金で払います。",k:["现金","付款"]},
+      {zh:"请问，图书馆怎么走？",py:"Qǐngwèn, túshūguǎn zěnme zǒu?",ja:"すみません、図書館はどう行きますか？",k:["图书馆","怎么走"]},
+    ],
+    departing:[
+      {zh:"今天应该不会迟到了。",py:"Jīntiān yīnggāi bú huì chídào le.",ja:"今日は遅刻しなくてすみそうだ。",k:["迟到","不会"]},
+      {zh:"我的公交卡快到期了。",py:"Wǒ de gōngjiāo kǎ kuài dào qī le.",ja:"定期券の期限が切れそうだ。",k:["公交卡","到期"]},
+      {zh:"我是第一次来这里。",py:"Wǒ shì dì yī cì lái zhèlǐ.",ja:"ここに来るのは初めてです。",k:["第一次"]},
+    ],
+  },
+  alpha:{
+    approaching:[
+      {zh:"今天需要办什么手续来着…",py:"Jīntiān xūyào bàn shénme shǒuxù láizhe…",ja:"今日は何の手続きをするんだっけ…",k:["手续"]},
+      {zh:"我的学生证找不到了。",py:"Wǒ de xuéshēngzhèng zhǎo bù dào le.",ja:"学生証が見つからない。",k:["学生证","找不到"]},
+      {zh:"希望今天手续能顺利办完。",py:"Xīwàng jīntiān shǒuxù néng shùnlì bànwán.",ja:"今日の手続きがうまくいくといいな。",k:["手续","顺利"]},
+    ],
+    indoor:[
+      {zh:"我想申请在学证明。",py:"Wǒ xiǎng shēnqǐng zàixué zhèngmíng.",ja:"在学証明書を申請したいです。",k:["在学","证明"]},
+      {zh:"请问，怎么申请成绩证明？",py:"Qǐngwèn, zěnme shēnqǐng chéngjì zhèngmíng?",ja:"成績証明書はどう申請しますか？",k:["成绩","证明"]},
+      {zh:"我的学生证丢了，请问怎么补办？",py:"Wǒ de xuéshēngzhèng diū le, qǐngwèn zěnme bǔbàn?",ja:"学生証をなくしました。再発行はどうすればいいですか？",k:["学生证","补办"]},
+      {zh:"最近压力很大，想找人聊聊。",py:"Zuìjìn yālì hěn dà, xiǎng zhǎo rén liáoliao.",ja:"最近ストレスが多くて、誰かに話したいです。",k:["压力","聊聊"]},
+      {zh:"我想预约健康咨询。",py:"Wǒ xiǎng yùyuē jiànkāng zīxún.",ja:"健康相談を予約したいです。",k:["健康","咨询"]},
+    ],
+    departing:[
+      {zh:"终于办完了，累死了。",py:"Zhōngyú bàn wán le, lèi sǐ le.",ja:"やっと手続きが終わった、疲れ果てた。",k:["终于","累"]},
+      {zh:"手续办完了，去上课吧。",py:"Shǒuxù bàn wán le, qù shàngkè ba.",ja:"手続きが終わった、授業に行こう。",k:["手续","上课"]},
+    ],
+  },
+  mu:{
+    approaching:[
+      {zh:"今天要去图书馆查资料。",py:"Jīntiān yào qù túshūguǎn chá zīliào.",ja:"今日は図書館で資料を調べなければ。",k:["图书馆","资料"]},
+      {zh:"那本书还在馆里吗？",py:"Nà běn shū hái zài guǎn lǐ ma?",ja:"あの本はまだ館内にありますか？",k:["书","馆里"]},
+      {zh:"我要去还书了。",py:"Wǒ yào qù huán shū le.",ja:"本を返しに行かなければ。",k:["还书"]},
+    ],
+    indoor:[
+      {zh:"我想借这本书。",py:"Wǒ xiǎng jiè zhè běn shū.",ja:"この本を借りたいです。",k:["借","书"]},
+      {zh:"这本书可以续借吗？",py:"Zhè běn shū kěyǐ xùjiè ma?",ja:"この本は延長できますか？",k:["续借"]},
+      {zh:"请问，可以借摄像机吗？",py:"Qǐngwèn, kěyǐ jiè shèxiàngjī ma?",ja:"ビデオカメラを借りることはできますか？",k:["摄像机","借"]},
+      {zh:"我想用3D打印机做一个模型。",py:"Wǒ xiǎng yòng 3D dǎyìnjī zuò yī gè móxíng.",ja:"3Dプリンターでモデルを作りたいです。",k:["打印机","模型"]},
+    ],
+    departing:[
+      {zh:"借到书了，回去好好读。",py:"Jiè dào shū le, huíqu hǎohǎo dú.",ja:"本を借りられた、帰ってちゃんと読もう。",k:["借到","书"]},
+      {zh:"3D打印做完了，效果不错。",py:"3D dǎyìn zuò wán le, xiàoguǒ búcuò.",ja:"3Dプリントが完成した、なかなか良い出来だ。",k:["打印","效果"]},
+    ],
+  },
+  sigma:{
+    approaching:[
+      {zh:"今天中午吃什么好？",py:"Jīntiān zhōngwǔ chī shénme hǎo?",ja:"今日のランチは何がいいかな？",k:["中午","吃什么"]},
+      {zh:"食堂今天会不会很挤？",py:"Shítáng jīntiān huì bu huì hěn jǐ?",ja:"今日の食堂は混んでいるかな？",k:["食堂","挤"]},
+      {zh:"我想去便利店买点东西。",py:"Wǒ xiǎng qù biànlìdiàn mǎi diǎn dōngxi.",ja:"コンビニで少し買い物したい。",k:["便利店","买"]},
+    ],
+    indoor:[
+      {zh:"请给我一份日式定食。",py:"Qǐng gěi wǒ yī fèn rìshì dìngshí.",ja:"日替わり定食を一つください。",k:["定食","一份"]},
+      {zh:"可以用学生证打折吗？",py:"Kěyǐ yòng xuéshēngzhèng dǎzhé ma?",ja:"学生証で割引できますか？",k:["学生证","打折"]},
+      {zh:"用手机支付可以吗？",py:"Yòng shǒujī zhīfù kěyǐ ma?",ja:"スマホで支払えますか？",k:["手机","支付"]},
+      {zh:"这个能帮我加热一下吗？",py:"Zhège néng bāng wǒ jiārè yīxià ma?",ja:"これを温めてもらえますか？",k:["加热"]},
+    ],
+    departing:[
+      {zh:"吃饱了，下午也要加油。",py:"Chī bǎo le, xiàwǔ yě yào jiāyóu.",ja:"お腹いっぱいになった、午後も頑張ろう。",k:["吃饱","加油"]},
+      {zh:"买完东西了，去上课吧。",py:"Mǎi wán dōngxi le, qù shàngkè ba.",ja:"買い物が終わった、授業に行こう。",k:["买完","上课"]},
+    ],
+  },
+  lecture:{
+    approaching:[
+      {zh:"今天的课怎么样？",py:"Jīntiān de kè zěnmeyàng?",ja:"今日の授業はどうだった？",k:["今天的课"]},
+      {zh:"今天的考试怎么办…",py:"Jīntiān de kǎoshì zěnme bàn…",ja:"今日のテスト、どうしよう…",k:["考试","怎么办"]},
+      {zh:"快迟到了，快点走。",py:"Kuài chídào le, kuài diǎn zǒu.",ja:"遅刻しそう、急いで行こう。",k:["迟到","快点"]},
+    ],
+    indoor:[
+      {zh:"老师，我有一个问题想问您。",py:"Lǎoshī, wǒ yǒu yī gè wèntí xiǎng wèn nín.",ja:"先生、質問があります。",k:["老师","问题"]},
+      {zh:"这次作业的截止日期是什么时候？",py:"Zhècì zuòyè de jiézhǐ rìqī shì shénme shíhou?",ja:"今回の課題の締め切りはいつですか？",k:["作业","截止"]},
+      {zh:"你听懂今天的课了吗？",py:"Nǐ tīng dǒng jīntiān de kè le ma?",ja:"今日の授業、わかった？",k:["听懂","课"]},
+      {zh:"教授今天不来了，课取消了。",py:"Jiàoshòu jīntiān bù lái le, kè qǔxiāo le.",ja:"教授が今日来なくて、授業が休講になった。",k:["教授","取消"]},
+      {zh:"我们一起做这个小组作业吧。",py:"Wǒmen yīqǐ zuò zhège xiǎozǔ zuòyè ba.",ja:"一緒にこのグループ課題やろう。",k:["小组","作业"]},
+    ],
+    departing:[
+      {zh:"今天的课真有意思。",py:"Jīntiān de kè zhēn yǒuyìsi.",ja:"今日の授業は本当に面白かった。",k:["课","有意思"]},
+      {zh:"作业好多，今晚要加油了。",py:"Zuòyè hǎo duō, jīn wǎn yào jiāyóu le.",ja:"課題がたくさん、今夜は頑張らないと。",k:["作业","加油"]},
+      {zh:"终于下课了，好累。",py:"Zhōngyú xià kè le, hǎo lèi.",ja:"やっと授業が終わった、疲れた。",k:["下课","累"]},
+    ],
+  },
+  tau:{
+    approaching:[
+      {zh:"今天要去找研究生前辈聊聊。",py:"Jīntiān yào qù zhǎo yánjiūshēng qiánbèi liáoliao.",ja:"今日は大学院の先輩に話を聞きに行こう。",k:["研究生","前辈"]},
+      {zh:"我有点儿紧张，不知道怎么开口。",py:"Wǒ yǒudiǎnr jǐnzhāng, bù zhīdào zěnme kāikǒu.",ja:"少し緊張して、どう切り出せばいいかわからない。",k:["紧张","开口"]},
+    ],
+    indoor:[
+      {zh:"请问，可以请教您一个问题吗？",py:"Qǐngwèn, kěyǐ qǐngjiào nín yī gè wèntí ma?",ja:"一つお伺いしてもよいでしょうか？",k:["请教","问题"]},
+      {zh:"我的研究方向是环境信息学。",py:"Wǒ de yánjiū fāngxiàng shì huánjìng xìnxī xué.",ja:"私の研究分野は環境情報学です。",k:["研究","环境信息"]},
+      {zh:"您对我的研究有什么建议吗？",py:"Nín duì wǒ de yánjiū yǒu shénme jiànyì ma?",ja:"私の研究についてご意見はありますか？",k:["研究","建议"]},
+      {zh:"我想继续读研究生，您有什么建议吗？",py:"Wǒ xiǎng jìxù dú yánjiūshēng, nín yǒu shénme jiànyì ma?",ja:"大学院進学を考えていますが、アドバイスはありますか？",k:["研究生","建议"]},
+      {zh:"请多关照。",py:"Qǐng duō guānzhào.",ja:"よろしくお願いします。",k:["关照"]},
+    ],
+    departing:[
+      {zh:"学到了很多，真是受益匪浅。",py:"Xué dào le hěn duō, zhēn shì shòuyì fěiqiǎn.",ja:"たくさん学べた、本当に勉強になった。",k:["受益","学到"]},
+      {zh:"和前辈聊完感觉有方向了。",py:"Hé qiánbèi liáo wán gǎnjué yǒu fāngxiàng le.",ja:"先輩と話し終えて、方向性が見えてきた。",k:["前辈","方向"]},
+    ],
+  },
+  gamma:{
+    approaching:[
+      {zh:"今天要好好练习！",py:"Jīntiān yào hǎohǎo liànxí!",ja:"今日はしっかり練習するぞ！",k:["练习","好好"]},
+      {zh:"下周有比赛，有点儿紧张。",py:"Xià zhōu yǒu bǐsài, yǒudiǎnr jǐnzhāng.",ja:"来週試合があって少し緊張している。",k:["比赛","紧张"]},
+      {zh:"体育馆今天开着吗？",py:"Tǐyùguǎn jīntiān kāizhe ma?",ja:"体育館は今日開いていますか？",k:["体育馆","开"]},
+    ],
+    indoor:[
+      {zh:"你平时做什么运动？",py:"Nǐ píngshí zuò shénme yùndòng?",ja:"普段どんな運動をしていますか？",k:["运动","平时"]},
+      {zh:"你加入了什么社团？",py:"Nǐ jiārù le shénme shètuán?",ja:"どんなサークルに入っていますか？",k:["社团","加入"]},
+      {zh:"今天的练习太累了。",py:"Jīntiān de liànxí tài lèi le.",ja:"今日の練習はきつかった。",k:["练习","累"]},
+      {zh:"你的球技真厉害！",py:"Nǐ de qiújì zhēn lìhài!",ja:"プレーが本当にうまい！",k:["球技","厉害"]},
+    ],
+    departing:[
+      {zh:"今天练习真的很累。",py:"Jīntiān liànxí zhēnde hěn lèi.",ja:"今日の練習は本当に疲れた。",k:["练习","累"]},
+      {zh:"练习结束了，去吃饭吧。",py:"Liànxí jiéshù le, qù chīfàn ba.",ja:"練習が終わった、ご飯を食べに行こう。",k:["练习","吃饭"]},
+    ],
+  },
+  beta:{
+    approaching:[
+      {zh:"今天要完成原型。",py:"Jīntiān yào wánchéng yuánxíng.",ja:"今日はプロトタイプを完成させよう。",k:["原型","完成"]},
+      {zh:"截止日期快到了，有点儿慌。",py:"Jiézhǐ rìqī kuài dào le, yǒudiǎnr huāng.",ja:"締め切りが近づいてきて少し焦っている。",k:["截止","慌"]},
+      {zh:"今天要和组员讨论方案。",py:"Jīntiān yào hé zǔyuán tǎolùn fāngan.",ja:"今日はメンバーと案について議論しよう。",k:["组员","讨论"]},
+    ],
+    indoor:[
+      {zh:"我们的项目进展怎么样了？",py:"Wǒmen de xiàngmù jìnzhǎn zěnmeyàng le?",ja:"プロジェクトの進捗はどうですか？",k:["项目","进展"]},
+      {zh:"这个程序出错了，你能帮我看看吗？",py:"Zhège chéngxù chūcuò le, nǐ néng bāng wǒ kànkan ma?",ja:"このプログラムにエラーが出ました。見てもらえますか？",k:["程序","出错"]},
+      {zh:"截止日期是下周五，时间不够了。",py:"Jiézhǐ rìqī shì xià zhōu wǔ, shíjiān bùgòu le.",ja:"締め切りは来週金曜日で、時間が足りない。",k:["截止","时间"]},
+      {zh:"我想听听大家的意见。",py:"Wǒ xiǎng tīngting dàjiā de yìjiàn.",ja:"みんなの意見を聞きたいです。",k:["意见","大家"]},
+    ],
+    departing:[
+      {zh:"今天的进度还不错。",py:"Jīntiān de jìndù hái búcuò.",ja:"今日の進捗はなかなか良い。",k:["进度","不错"]},
+      {zh:"终于做完了！去休息一下吧。",py:"Zhōngyú zuò wán le! Qù xiūxi yīxià ba.",ja:"やっと終わった！少し休もう。",k:["终于","休息"]},
+    ],
+  },
+  pond:{
+    approaching:[
+      {zh:"去湖边坐坐吧。",py:"Qù hú biān zuòzuo ba.",ja:"池のほとりに座りに行こう。",k:["湖边","坐"]},
+      {zh:"今天终于可以休息了。",py:"Jīntiān zhōngyú kěyǐ xiūxi le.",ja:"今日はやっと休める。",k:["休息","终于"]},
+    ],
+    outdoor:[
+      {zh:"今天天气真好，在外面坐坐吧。",py:"Jīntiān tiānqì zhēn hǎo, zài wàimiàn zuòzuo ba.",ja:"今日は天気がいいから外で座ろう。",k:["天气","外面"]},
+      {zh:"鸭子又出来了！",py:"Yāzi yòu chūlái le!",ja:"カモがまた出てきた！",k:["鸭子"]},
+      {zh:"最近怎么样？有没有什么烦恼？",py:"Zuìjìn zěnmeyàng? Yǒu méiyǒu shénme fánnǎo?",ja:"最近どう？何か悩みはある？",k:["最近","烦恼"]},
+      {zh:"下次一起去藤沢吃饭吧。",py:"Xià cì yīqǐ qù Téngzé chīfàn ba.",ja:"今度一緒に藤沢に食べに行こう。",k:["藤沢","吃饭"]},
+      {zh:"期末考试结束了，终于可以放松了。",py:"Qīmò kǎoshì jiéshù le, zhōngyú kěyǐ fàngsōng le.",ja:"期末試験が終わって、やっとリラックスできる。",k:["期末","放松"]},
+    ],
+    departing:[
+      {zh:"休息好了，继续加油吧。",py:"Xiūxi hǎo le, jìxù jiāyóu ba.",ja:"十分休んだ、また頑張ろう。",k:["休息","加油"]},
+      {zh:"今天和朋友聊得很开心。",py:"Jīntiān hé péngyou liáo de hěn kāixīn.",ja:"今日は友達とおしゃべりしてとても楽しかった。",k:["朋友","开心"]},
+      {zh:"时间过得真快，马上就要毕业了。",py:"Shíjiān guò de zhēn kuài, mǎshàng jiù yào bìyè le.",ja:"時間が経つのは早いもので、もうすぐ卒業だ。",k:["时间","毕业"]},
+    ],
+  },
+};
+
+const SL = {approaching:"接近中",indoor:"屋内",outdoor:"屋外",departing:"退出後"};
+const SC = {approaching:"#2cb67d",indoor:"#7f5af0",outdoor:"#ff8906",departing:"#ef4565"};
+
+// ============================================================
+// APP STATE
+// ============================================================
+let watchId=null, curPos=null, prevPos=null;
+let curBld=null, curState=null;
+let sess=null;   // {bid,bname,state,phrases,idx,correct,results[]}
+let recog=null;
+
+// ============================================================
+// GPS
+// ============================================================
+function startGPS(){
+  if(!navigator.geolocation){
+    setInfo("このブラウザは位置情報に対応していません"); return;
+  }
+  watchId = navigator.geolocation.watchPosition(onPos, onErr,
+    {enableHighAccuracy:true, maximumAge:0, timeout:15000});
+}
+
+function onPos(p){
+  prevPos=curPos; curPos=p;
+  const acc=p.coords.accuracy;
+
+  // 精度バッジ
+  const ba=document.getElementById("bAcc");
+  ba.style.display="";
+  if(acc<=5){ba.textContent="QZSS ±"+acc.toFixed(1)+"m";ba.className="badge b-qzss";}
+  else if(acc<=15){ba.textContent="GPS ±"+acc.toFixed(0)+"m";ba.className="badge b-gps";}
+  else{ba.textContent="精度待ち ±"+acc.toFixed(0)+"m";ba.className="badge b-wait";}
+
+  // デバッグ座標表示
+  const dbg=document.getElementById("debugCoords");
+  if(dbg){
+    const dist=haversine(p.coords.latitude,p.coords.longitude,CAMPUS_CENTER.lat,CAMPUS_CENTER.lng);
+    dbg.textContent="📍 "+p.coords.latitude.toFixed(6)+", "+p.coords.longitude.toFixed(6)+" | 中心から"+dist.toFixed(0)+"m";
+  }
+
+  // 最近傍建物
+  const nr=findNearest(p.coords.latitude,p.coords.longitude);
+  curBld   = nr.bld;
+  curState = nr.bld ? detectState(p,nr) : null;
+
+  updatePin(p);
+  updateBldHighlight();
+  updateBadges();
+  updateStartBtn();
+}
+
+function onErr(e){setInfo("位置情報の取得に失敗しました（"+e.message+"）");}
+
+function findNearest(lat,lng){
+  let best=null, bd=Infinity;
+  for(const b of BUILDINGS){
+    const d=haversine(lat,lng,b.lat,b.lng);
+    if(d<b.r && d<bd){bd=d;best=b;}
+  }
+  return {bld:best,dist:bd};
+}
+
+function detectState(p,nr){
+  const acc=p.coords.accuracy, b=nr.bld;
+  if(b.indoor && acc>10) return "indoor";
+  if(prevPos){
+    const pd=haversine(prevPos.coords.latitude,prevPos.coords.longitude,b.lat,b.lng);
+    const cd=nr.dist;
+    const sp=p.coords.speed||estSpeed(prevPos,p);
+    if(cd<pd-2 && sp>0.3) return "approaching";
+    if(cd>pd+2) return "departing";
+  }
+  return "outdoor";
+}
+
+function estSpeed(p1,p2){
+  const d=haversine(p1.coords.latitude,p1.coords.longitude,p2.coords.latitude,p2.coords.longitude);
+  const t=(p2.timestamp-p1.timestamp)/1000;
+  return t>0?d/t:0;
+}
+
+function haversine(la1,lo1,la2,lo2){
+  const R=6371000,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;
+  const a=Math.sin(dLa/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+// ============================================================
+// MAP UI
+// ============================================================
+function updatePin(p){
+  const s=g2s(p.coords.latitude,p.coords.longitude);
+  for(const id of["pin-dot","pin-ring"]){
+    document.getElementById(id).setAttribute("cx",s.x.toFixed(1));
+    document.getElementById(id).setAttribute("cy",s.y.toFixed(1));
+  }
+}
+
+function updateBldHighlight(){
+  document.querySelectorAll("[data-bid]").forEach(el=>{
+    const orig = el.getAttribute("data-orig-stroke") || el.getAttribute("stroke");
+    if(!el.getAttribute("data-orig-stroke")) el.setAttribute("data-orig-stroke",orig);
+    el.setAttribute("stroke", orig);
+  });
+  if(curBld && curState){
+    const el=document.querySelector("[data-bid='"+curBld.id+"']");
+    if(el) el.setAttribute("stroke",SC[curState]);
+  }
+}
+
+function updateBadges(){
+  const ba=document.getElementById("bArea"), bs=document.getElementById("bState");
+  if(curBld){
+    ba.textContent=curBld.name;
+    bs.style.display="";
+    bs.textContent=SL[curState];
+    bs.className="badge b-"+curState;
+    setInfo("<strong>"+curBld.name+"</strong> 付近（"+SL[curState]+"）のフレーズが表示されます");
+  } else if(curPos && isOnCampus(curPos.coords.latitude,curPos.coords.longitude)){
+    ba.textContent="建物に近づいてください";
+    bs.style.display="none";
+    setInfo("建物の近くに来ると、場所に合ったフレーズに切り替わります。");
+  } else {
+    ba.textContent="SFCキャンパス外";
+    bs.style.display="none";
+    setInfo("SFCキャンパス内に入るとフレーズが表示されます。");
+  }
+}
+
+function updateStartBtn(){
+  const btn=document.getElementById("btnStart");
+  const phs=getPhrases(curBld?curBld.id:null,curState);
+  if(curBld && curState && phs.length>0){
+    btn.disabled=false;
+    btn.textContent=curBld.name+"のフレーズを練習する";
+  } else {
+    btn.disabled=true;
+    btn.textContent="フレーズ練習を始める";
+  }
+}
+
+function setInfo(html){document.getElementById("infoBox").innerHTML=html;}
+
+// ============================================================
+// PHRASES
+// ============================================================
+function getPhrases(bid,state){
+  if(!bid||!state) return [];
+  const d=PH[bid]; if(!d) return [];
+  return d[state]||d["outdoor"]||[];
+}
+
+// ============================================================
+// SESSION
+// ============================================================
+function startSession(wrongOnly){
+  const bid=curBld?curBld.id:null;
+  const bname=curBld?curBld.name:"フリー練習";
+  const st=curState||"outdoor";
+
+  let pool;
+  if(wrongOnly && sess && sess.results.length>0){
+    pool=sess.results.filter(r=>!r.ok).map(r=>r.ph);
+  } else {
+    pool=getPhrases(bid,st);
+  }
+  if(!pool||pool.length===0){alert("このエリアにフレーズがありません");return;}
+
+  const shuffled=[...pool].sort(()=>Math.random()-.5).slice(0,5);
+  sess={bid,bname,state:st,phrases:shuffled,idx:0,correct:0,results:[]};
+  showScreen("s-practice");
+  loadPhrase();
+}
+
+function retrySession(){startSession(false);}
+function practiceWrong(){startSession(true);}
+
+function loadPhrase(){
+  const ph=sess.phrases[sess.idx];
+  document.getElementById("pArea").textContent=sess.bname;
+  document.getElementById("pCounter").textContent=(sess.idx+1)+" / "+sess.phrases.length;
+
+  const tag=document.getElementById("pStateTag");
+  tag.textContent=SL[sess.state];
+  tag.style.cssText="background:"+SC[sess.state]+"30;color:"+SC[sess.state]+";border:1px solid "+SC[sess.state];
+
+  document.getElementById("pZh").textContent=ph.zh;
+  document.getElementById("pJa").textContent=ph.ja;
+  document.getElementById("pPinyin").textContent="";
+  document.getElementById("pPinyin").className="p-pinyin";
+  document.getElementById("pRecog").textContent="";
+  setStatus("idle","マイクボタンを押して発音してください");
+  document.getElementById("btnNext").style.display="none";
+  document.getElementById("btnMic").style.display="";
+  resetMic();
+}
+
+function nextPhrase(){
+  sess.idx++;
+  if(sess.idx>=sess.phrases.length){saveHistory();showResult();}
+  else loadPhrase();
+}
+
+// ============================================================
+// SPEECH RECOGNITION
+// ============================================================
+function doRecog(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){setStatus("ng","Chrome/Edgeで開いてください（Web Speech API対応ブラウザ）");return;}
+  if(recog){try{recog.stop();}catch(e){}}
+  recog=new SR();
+  recog.lang="zh-CN";
+  recog.continuous=false;
+  recog.interimResults=false;
+  recog.onstart=()=>{
+    const b=document.getElementById("btnMic");
+    b.classList.add("rec");b.textContent="● 聞いています...";
+    setStatus("listening","発音してください...");
+  };
+  recog.onresult=e=>{
+    const t=e.results[0][0].transcript;
+    document.getElementById("pRecog").textContent="認識："+t;
+    judge(t);
+  };
+  recog.onerror=e=>{setStatus("ng","エラー："+e.error);resetMic();};
+  recog.onend=()=>resetMic();
+  recog.start();
+}
+
+function judge(rec){
+  const ph=sess.phrases[sess.idx];
+  const ok=ph.k.some(k=>rec.includes(k));
+  const pp=document.getElementById("pPinyin");
+  pp.textContent=ph.py;
+  pp.className="p-pinyin "+(ok?"ok":"ng");
+  if(ok){sess.correct++;setStatus("ok","正解！");}
+  else{setStatus("ng","不正解　↑ ピンインを確認してください");}
+  sess.results.push({ph,ok});
+  const isLast=sess.idx>=sess.phrases.length-1;
+  const bn=document.getElementById("btnNext");
+  bn.textContent=isLast?"結果を見る →":"次へ →";
+  bn.style.display="";
+  document.getElementById("btnMic").style.display="none";
+}
+
+function setStatus(type,msg){
+  const el=document.getElementById("pStatus");
+  el.className="p-status "+type;el.textContent=msg;
+}
+function resetMic(){
+  const b=document.getElementById("btnMic");
+  b.classList.remove("rec");b.textContent="発音する";
+}
+
+// ============================================================
+// RESULT
+// ============================================================
+function showResult(){
+  const tot=sess.phrases.length;
+  const rate=Math.round(sess.correct/tot*100);
+  const big=document.getElementById("rBig");
+  big.textContent=sess.correct;
+  big.style.color=rate>=80?"#2cb67d":rate>=60?"#ff8906":"#ef4565";
+  document.getElementById("rTitle").textContent=sess.bname+"（"+SL[sess.state]+"）";
+  document.getElementById("rDenom").textContent="/ "+tot+" 問正解";
+  document.getElementById("rRate").textContent=rate+"%";
+  document.getElementById("rComment").textContent=
+    rate===100?"パーフェクト！":rate>=80?"よくできました！":rate>=60?"あと少し！":"もう一度練習しよう";
+  const wrongs=sess.results.filter(r=>!r.ok).length;
+  document.getElementById("btnWrong").style.display=wrongs>0?"":"none";
+  showScreen("s-result");
+}
+
+// ============================================================
+// LOCAL STORAGE
+// ============================================================
+function saveHistory(){
+  const h=getHistory();
+  h.unshift({
+    date:new Date().toLocaleString("ja-JP"),
+    bname:sess.bname,state:sess.state,
+    correct:sess.correct,total:sess.phrases.length
+  });
+  try{localStorage.setItem("sfc_zh_hist",JSON.stringify(h.slice(0,60)));}catch(e){}
+}
+function getHistory(){
+  try{return JSON.parse(localStorage.getItem("sfc_zh_hist"))||[];}catch{return [];}
+}
+
+function goHistory(){
+  const h=getHistory();
+  document.getElementById("hStats").textContent="全"+h.length+"セッション";
+  const body=document.getElementById("hBody");
+  if(!h.length){
+    body.innerHTML='<div class="h-empty">まだ練習記録がありません</div>';
+  } else {
+    body.innerHTML=h.map(r=>{
+      const rt=Math.round(r.correct/r.total*100);
+      const c=rt>=80?"#2cb67d":rt>=60?"#ff8906":"#ef4565";
+      return '<div class="h-item">'
+        +'<div class="h-r1"><span class="h-area">'+r.bname+'</span>'
+        +'<span class="h-score" style="color:'+c+'">'+r.correct+'/'+r.total+'（'+rt+'%）</span></div>'
+        +'<div class="h-r2"><span>'+r.date+'</span><span>'+SL[r.state]+'</span></div>'
+        +'</div>';
+    }).join("");
+  }
+  showScreen("s-history");
+}
+
+// ============================================================
+// PHRASE LIST
+// ============================================================
+function renderPhraseList(){
+  const wrongSet=new Set(sess?sess.results.filter(r=>!r.ok).map(r=>r.ph.zh):[]);
+  let html="";
+  for(const b of BUILDINGS){
+    const pd=PH[b.id]; if(!pd) continue;
+    html+='<div class="ph-bld">'+b.name+'</div>';
+    for(const sk of Object.keys(pd)){
+      html+='<div class="ph-st">▸ '+SL[sk]+'</div>';
+      for(const ph of pd[sk]){
+        const w=wrongSet.has(ph.zh);
+        html+='<div class="ph-item'+(w?" wrong":"'")+'>'
+          +'<span class="ph-mark">'+(w?"✗":"")+'</span>'
+          +'<div><div class="ph-zh">'+ph.zh+'</div>'
+          +'<div class="ph-py">'+ph.py+'</div>'
+          +'<div class="ph-ja">'+ph.ja+'</div></div>'
+          +'</div>';
+      }
+    }
+  }
+  document.getElementById("phBody").innerHTML=html;
+}
+
+// ============================================================
+// SCREEN
+// ============================================================
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="s-phrases") renderPhraseList();
+  if(id==="s-map") window.scrollTo(0,0);
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+window.addEventListener("load",startGPS);
+</script>
+</body>
+</html>
