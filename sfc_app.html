@@ -339,7 +339,7 @@ const BUILDINGS = [
 
 // キャンパス全体の境界（建物未検出時の判定用）
 const CAMPUS_CENTER = {lat:35.3888, lng:139.4270};
-const CAMPUS_R = 420; // meters（敷地全体をカバー）
+const CAMPUS_R = 1200; // meters（屋内GPS誤差を考慮して広めに設定）
 
 function isOnCampus(lat,lng){
   return haversine(lat,lng,CAMPUS_CENTER.lat,CAMPUS_CENTER.lng) < CAMPUS_R;
@@ -556,7 +556,7 @@ function onPos(p){
   const dbg=document.getElementById("debugCoords");
   if(dbg){
     const dist=haversine(p.coords.latitude,p.coords.longitude,CAMPUS_CENTER.lat,CAMPUS_CENTER.lng);
-    dbg.textContent="📍 "+p.coords.latitude.toFixed(6)+", "+p.coords.longitude.toFixed(6)+" | 中心から"+dist.toFixed(0)+"m";
+    dbg.textContent="📍 "+p.coords.latitude.toFixed(6)+", "+p.coords.longitude.toFixed(6)+" | 中心から"+dist.toFixed(0)+"m | 精度±"+acc.toFixed(0)+"m";
   }
 
   // 最近傍建物
