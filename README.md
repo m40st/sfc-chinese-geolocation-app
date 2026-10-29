@@ -183,7 +183,7 @@ Just open the URL in your browser. No installation required.
 慶應義塾大学 環境情報学部 宮本研究会B2（外国語教授法・AI教材開発）の個別プロジェクトとして開発。  
 GPSジオフェンシングを活用した「場所連動型語学学習」の実証実験アプリ。CLT（コミュニカティブ・ランゲージ・ティーチング）およびTBLT（タスク・ベースト・ランゲージ・ティーチング）の理論に基づき、学習者が実際のキャンパス環境でリアルな文脈のもと中国語を使用することを目的としている。
 
-Developed as part of Professor Miya's seminar at Keio SFC, focused on foreign language teaching methodology and AI-integrated educational material development. This app serves as a proof-of-concept for location-triggered language learning using GPS geofencing, grounded in CLT (Communicative Language Teaching) and TBLT (Task-Based Language Teaching) principles.
+Developed as part of Professor Miyamoto's seminar B2 at Keio SFC, focused on foreign language teaching methodology and AI-integrated educational material development. This app serves as a proof-of-concept for location-triggered language learning using GPS geofencing, grounded in CLT (Communicative Language Teaching) and TBLT (Task-Based Language Teaching) principles.
 
 ---
 
