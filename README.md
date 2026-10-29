@@ -1,7 +1,7 @@
 # SFC 中国語フレーズ学習アプリ
 **SFC Chinese Phrase Learning App**
 
-慶應義塾大学SFCキャンパス内で、現在地に応じた中国語フレーズを学習できるWebアプリです。  
+慶應義塾大学SFCキャンパス内で、現在地に応じた中国語フレーズを学習できるWebアプリ。  
 A location-aware Chinese language learning web app designed for use on the Keio University SFC campus.
 
 🌐 **[Live Demo](https://sfc-chinese-geolocation-app.netlify.app)**
@@ -21,7 +21,7 @@ A location-aware Chinese language learning web app designed for use on the Keio 
 | **目標** | 研究発表版（v1.0）の完成 |
 | **場所** | 慶應義塾大学 SFCキャンパス |
 
-> このリポジトリは単一ブランチで継続的にアップデートしています。プロトタイプから研究発表版への変遷はコミット履歴で確認できます。  
+> このリポジトリは単一ブランチで継続的にアップデートしている。プロトタイプから研究発表版への変遷はコミット履歴で確認可能。  
 > This repository is continuously updated on a single branch. The evolution from prototype to research release can be traced through the commit history.
 
 ---
@@ -72,7 +72,7 @@ Phase 1 ──────── Phase 2 ──────────── Ph
 
 ## 概要 / Overview
 
-SFCキャンパス内を歩きながら、いる場所に合った中国語フレーズが自動的に表示されます。発音練習機能（Web Speech API）も搭載しており、実際に声に出して学習できます。
+SFCキャンパス内を歩きながら、いる場所に合った中国語フレーズが自動的に表示される。発音練習機能（Web Speech API）も搭載しており、実際に声に出して学習することができる。
 
 As you walk around the SFC campus, the app automatically displays Chinese phrases relevant to your current location. It also features pronunciation practice powered by the Web Speech API, so you can learn by speaking aloud.
 
@@ -111,7 +111,7 @@ As you walk around the SFC campus, the app automatically displays Chinese phrase
 | βヴィレッジ | 学生寮エリア | 推定値 |
 | 鴨池・学生ラウンジ | ガリバー池・サブウェイ | 推定値 |
 
-「推定値」の建物は今後Google Maps実測値への更新を予定しています。  
+「推定値」の建物は今後Google Maps実測値への更新を予定している。  
 Buildings marked "推定値" (estimated) are planned to be updated with accurate Google Maps coordinates.
 
 ---
@@ -147,7 +147,7 @@ Haversine formula で各建物との距離を計算
 建物ごとのフレーズを表示
 ```
 
-建物座標はQZSS（±3〜4m精度）による現地実測値を一部使用しています。QZSSは日本の準天頂衛星システムで、日本国内では通常のGPSより高精度な位置情報を提供します。  
+建物座標はQZSS（±3〜4m精度）による現地実測値を一部使用。QZSSは日本の準天頂衛星システムで、日本国内では通常のGPSより高精度な位置情報を提供する。  
 Some building coordinates are based on on-site measurements using QZSS (±3–4m accuracy). QZSS (Quasi-Zenith Satellite System) is Japan's own satellite positioning system, providing higher accuracy than standard GPS within Japan.
 
 ---
@@ -161,7 +161,7 @@ Some building coordinates are based on on-site measurements using QZSS (±3–4m
 5. 「フレーズ練習を始める」でマイクを使って発音練習 / Tap "Start Practice" to practice pronunciation
 
 > ⚠️ **注意 / Note**  
-> 位置情報の精度向上のため、スマホの位置情報設定を「高精度」モードにしてください。  
+> 位置情報の精度向上のため、スマホの位置情報設定を「高精度」モードにすることが必須。  
 > For best accuracy, set your phone's location mode to "High accuracy" (GPS + Wi-Fi + Cell).
 
 ---
@@ -170,18 +170,18 @@ Some building coordinates are based on on-site measurements using QZSS (±3–4m
 
 🌐 **[https://sfc-chinese-geolocation-app.netlify.app](https://sfc-chinese-geolocation-app.netlify.app)**
 
-ブラウザでURLを開くだけで動作します。インストール不要。  
+ブラウザでURLを開くだけで動作する。インストール不要。  
 Just open the URL in your browser. No installation required.
 
-> 開発者向け：`sfc_app.html` 単体ファイルで完結しています。クローンしてHTTPSサーバー上で動かしてください（位置情報APIはHTTPS必須）。  
+> 開発者向け：`sfc_app.html` 単体ファイルで完結している。クローンしてHTTPSサーバー上で動かすこと（位置情報APIはHTTPS必須）。  
 > For developers: the app is a single self-contained file (`sfc_app.html`). Clone the repo and serve it over HTTPS (Geolocation API requires HTTPS).
 
 ---
 
 ## 開発背景 / Background
 
-慶應義塾大学SFC・宮研究会（外国語教授法・AI教材開発）のプロジェクトとして開発。  
-GPSジオフェンシングを活用した「場所連動型語学学習」の実証実験アプリです。CLT（コミュニカティブ・ランゲージ・ティーチング）およびTBLT（タスク・ベースト・ランゲージ・ティーチング）の理論に基づき、学習者が実際のキャンパス環境でリアルな文脈のもと中国語を使用することを目的としています。
+慶應義塾大学 環境情報学部 宮本研究会B2（外国語教授法・AI教材開発）の個別プロジェクトとして開発。  
+GPSジオフェンシングを活用した「場所連動型語学学習」の実証実験アプリ。CLT（コミュニカティブ・ランゲージ・ティーチング）およびTBLT（タスク・ベースト・ランゲージ・ティーチング）の理論に基づき、学習者が実際のキャンパス環境でリアルな文脈のもと中国語を使用することを目的としている。
 
 Developed as part of Professor Miya's seminar at Keio SFC, focused on foreign language teaching methodology and AI-integrated educational material development. This app serves as a proof-of-concept for location-triggered language learning using GPS geofencing, grounded in CLT (Communicative Language Teaching) and TBLT (Task-Based Language Teaching) principles.
 
