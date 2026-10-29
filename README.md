@@ -4,7 +4,7 @@
 慶應義塾大学SFCキャンパス内で、現在地に応じた中国語フレーズを学習できるWebアプリ。  
 A location-aware Chinese language learning web app designed for use on the Keio University SFC campus.
 
-🌐 **[Live Demo](https://sfc-chinese-geolocation-app.netlify.app)**
+🌐 **[Live Demo](https://sfc-chinese-geolocation.netlify.app)**
 
 ![Status](https://img.shields.io/badge/status-Prototype-orange)
 ![Status](https://img.shields.io/badge/ステージ-実証実験中-orange)
@@ -168,7 +168,7 @@ Some building coordinates are based on on-site measurements using QZSS (±3–4m
 
 ## アクセス / Access
 
-🌐 **[https://sfc-chinese-geolocation-app.netlify.app](https://sfc-chinese-geolocation-app.netlify.app)**
+🌐 **[https://sfc-chinese-geolocation.netlify.app](https://sfc-chinese-geolocation.netlify.app)**
 
 ブラウザでURLを開くだけで動作する。インストール不要。  
 Just open the URL in your browser. No installation required.
