@@ -115,6 +115,7 @@ body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;background:#000000;co
 <div id="s-map" class="screen active">
   <div class="map-header">
     <div class="map-title">SFC 中国語フレーズ学習</div>
+    <div style="font-size:10px;color:#555;text-align:right;padding-right:8px;">v2.1</div>
     <div class="badges">
       <span class="badge b-area" id="bArea">位置情報を取得中...</span>
       <span class="badge" id="bState" style="display:none"></span>
@@ -326,20 +327,22 @@ body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;background:#000000;co
 // DATA: 建物
 // ============================================================
 const BUILDINGS = [
-  {id:"bus",    name:"バス停A・B",                lat:35.386208,lng:139.424284,r:80, indoor:false},
-  {id:"mu",     name:"Μ館（メディアセンター）",   lat:35.387608,lng:139.424384,r:70, indoor:true},
-  {id:"alpha",  name:"Α館",                       lat:35.386808,lng:139.426584,r:70, indoor:true},
-  {id:"sigma",  name:"Σ館",                       lat:35.387408,lng:139.425384,r:75, indoor:true},
-  {id:"lecture",name:"講義棟（κ・ε・ι・ο・λ・Θ）",lat:35.388573,lng:139.426533,r:95, indoor:true},
-  {id:"tau",    name:"τ館",                       lat:35.389004,lng:139.425898,r:65, indoor:true},
-  {id:"gamma",  name:"Γ館（体育館）",              lat:35.388708,lng:139.427284,r:65, indoor:true},
-  {id:"beta",   name:"βヴィレッジ",               lat:35.386808,lng:139.427284,r:70, indoor:true},
-  {id:"pond",   name:"鴨池・学生ラウンジ",          lat:35.388908,lng:139.425184,r:80, indoor:false},
+  // 座標はGoogle Maps四隅実測値から算出した中心座標（2026-10-30更新）
+  {id:"bus",     name:"バス停",                      lat:35.387627,lng:139.428452,r:35,  indoor:false},
+  {id:"mu",      name:"Μ館（メディアセンター）",      lat:35.388260,lng:139.427318,r:65,  indoor:true},
+  {id:"alpha",   name:"α館",                          lat:35.388434,lng:139.427965,r:55,  indoor:true},
+  {id:"omega",   name:"Ω館",                          lat:35.387813,lng:139.427797,r:55,  indoor:true},
+  {id:"subway",  name:"サブウェイ・学生ラウンジ",      lat:35.387610,lng:139.427345,r:45,  indoor:true},
+  {id:"sigma",   name:"Σ館（食堂・購買部）",           lat:35.387204,lng:139.426122,r:60,  indoor:true},
+  {id:"lecture", name:"講義棟（κ・ε・ι・ο・λ・θ）",  lat:35.388458,lng:139.426684,r:115, indoor:true},
+  {id:"tau",     name:"τ館",                          lat:35.389192,lng:139.425723,r:55,  indoor:true},
+  {id:"delta",   name:"Δ館",                          lat:35.388255,lng:139.425462,r:55,  indoor:true},
+  {id:"gamma",   name:"Γ館（体育館）",                lat:35.390241,lng:139.426986,r:65,  indoor:true},
 ];
 
 // キャンパス全体の境界（建物未検出時の判定用）
-const CAMPUS_CENTER = {lat:35.388008, lng:139.425784};
-const CAMPUS_R = 500; // meters（実測座標に基づき修正済み）
+const CAMPUS_CENTER = {lat:35.388458, lng:139.426684};
+const CAMPUS_R = 500; // meters（Google Maps実測座標に基づき更新 2026-10-30）
 
 function isOnCampus(lat,lng){
   return haversine(lat,lng,CAMPUS_CENTER.lat,CAMPUS_CENTER.lng) < CAMPUS_R;
@@ -515,6 +518,63 @@ const PH = {
       {zh:"休息好了，继续加油吧。",py:"Xiūxi hǎo le, jìxù jiāyóu ba.",ja:"十分休んだ、また頑張ろう。",k:["休息","加油"]},
       {zh:"今天和朋友聊得很开心。",py:"Jīntiān hé péngyou liáo de hěn kāixīn.",ja:"今日は友達とおしゃべりしてとても楽しかった。",k:["朋友","开心"]},
       {zh:"时间过得真快，马上就要毕业了。",py:"Shíjiān guò de zhēn kuài, mǎshàng jiù yào bìyè le.",ja:"時間が経つのは早いもので、もうすぐ卒業だ。",k:["时间","毕业"]},
+    ],
+  },
+  // Ω館 → 講義棟と同じフレーズを使用
+  omega:{
+    approaching:[
+      {zh:"今天的课怎么样？",py:"Jīntiān de kè zěnmeyàng?",ja:"今日の授業はどうだった？",k:["今天的课"]},
+      {zh:"今天的考试怎么办…",py:"Jīntiān de kǎoshì zěnme bàn…",ja:"今日のテスト、どうしよう…",k:["考试","怎么办"]},
+      {zh:"快迟到了，快点走。",py:"Kuài chídào le, kuài diǎn zǒu.",ja:"遅刻しそう、急いで行こう。",k:["迟到","快点"]},
+    ],
+    indoor:[
+      {zh:"老师，我有一个问题想问您。",py:"Lǎoshī, wǒ yǒu yī gè wèntí xiǎng wèn nín.",ja:"先生、質問があります。",k:["老师","问题"]},
+      {zh:"这次作业的截止日期是什么时候？",py:"Zhècì zuòyè de jiézhǐ rìqī shì shénme shíhou?",ja:"今回の課題の締め切りはいつですか？",k:["作业","截止"]},
+      {zh:"你听懂今天的课了吗？",py:"Nǐ tīng dǒng jīntiān de kè le ma?",ja:"今日の授業、わかった？",k:["听懂","课"]},
+      {zh:"教授今天不来了，课取消了。",py:"Jiàoshòu jīntiān bù lái le, kè qǔxiāo le.",ja:"教授が今日来なくて、授業が休講になった。",k:["教授","取消"]},
+      {zh:"我们一起做这个小组作业吧。",py:"Wǒmen yīqǐ zuò zhège xiǎozǔ zuòyè ba.",ja:"一緒にこのグループ課題やろう。",k:["小组","作业"]},
+    ],
+    departing:[
+      {zh:"今天的课真有意思。",py:"Jīntiān de kè zhēn yǒuyìsi.",ja:"今日の授業は本当に面白かった。",k:["课","有意思"]},
+      {zh:"作业好多，今晚要加油了。",py:"Zuòyè hǎo duō, jīn wǎn yào jiāyóu le.",ja:"課題がたくさん、今夜は頑張らないと。",k:["作业","加油"]},
+      {zh:"终于下课了，好累。",py:"Zhōngyú xià kè le, hǎo lèi.",ja:"やっと授業が終わった、疲れた。",k:["下课","累"]},
+    ],
+  },
+  // Δ館 → τ館（研究棟）と同じフレーズを使用
+  delta:{
+    approaching:[
+      {zh:"今天要去找研究生前辈聊聊。",py:"Jīntiān yào qù zhǎo yánjiūshēng qiánbèi liáoliao.",ja:"今日は大学院の先輩に話を聞きに行こう。",k:["研究生","前辈"]},
+      {zh:"我有点儿紧张，不知道怎么开口。",py:"Wǒ yǒudiǎnr jǐnzhāng, bù zhīdào zěnme kāikǒu.",ja:"少し緊張して、どう切り出せばいいかわからない。",k:["紧张","开口"]},
+    ],
+    indoor:[
+      {zh:"请问，可以请教您一个问题吗？",py:"Qǐngwèn, kěyǐ qǐngjiào nín yī gè wèntí ma?",ja:"一つお伺いしてもよいでしょうか？",k:["请教","问题"]},
+      {zh:"我的研究方向是环境信息学。",py:"Wǒ de yánjiū fāngxiàng shì huánjìng xìnxī xué.",ja:"私の研究分野は環境情報学です。",k:["研究","环境信息"]},
+      {zh:"您对我的研究有什么建议吗？",py:"Nín duì wǒ de yánjiū yǒu shénme jiànyì ma?",ja:"私の研究についてご意見はありますか？",k:["研究","建议"]},
+      {zh:"我想继续读研究生，您有什么建议吗？",py:"Wǒ xiǎng jìxù dú yánjiūshēng, nín yǒu shénme jiànyì ma?",ja:"大学院進学を考えていますが、アドバイスはありますか？",k:["研究生","建议"]},
+      {zh:"请多关照。",py:"Qǐng duō guānzhào.",ja:"よろしくお願いします。",k:["关照"]},
+    ],
+    departing:[
+      {zh:"学到了很多，真是受益匪浅。",py:"Xué dào le hěn duō, zhēn shì shòuyì fěiqiǎn.",ja:"たくさん学べた、本当に勉強になった。",k:["受益","学到"]},
+      {zh:"和前辈聊完感觉有方向了。",py:"Hé qiánbèi liáo wán gǎnjué yǒu fāngxiàng le.",ja:"先輩と話し終えて、方向性が見えてきた。",k:["前辈","方向"]},
+    ],
+  },
+  // サブウェイ・学生ラウンジ
+  subway:{
+    approaching:[
+      {zh:"肚子饿了，去买点吃的吧。",py:"Dùzi è le, qù mǎi diǎn chī de ba.",ja:"お腹が空いた、何か買いに行こう。",k:["肚子","饿"]},
+      {zh:"去休息室坐一会儿吧。",py:"Qù xiūxishì zuò yīhuìr ba.",ja:"ラウンジでちょっと休もう。",k:["休息室","坐"]},
+      {zh:"今天想吃三明治。",py:"Jīntiān xiǎng chī sānmíngzhì.",ja:"今日はサンドイッチが食べたい。",k:["三明治"]},
+    ],
+    indoor:[
+      {zh:"你好，请给我一个金枪鱼三明治。",py:"Nǐ hǎo, qǐng gěi wǒ yī gè jīnqiāngyú sānmíngzhì.",ja:"こんにちは、ツナサンドを一つください。",k:["金枪鱼","三明治"]},
+      {zh:"请问有没有不辣的套餐？",py:"Qǐngwèn yǒu méiyǒu bù là de tàocān?",ja:"辛くないセットはありますか？",k:["辣","套餐"]},
+      {zh:"这里可以插电脑充电吗？",py:"Zhèlǐ kěyǐ chā diànnǎo chōngdiàn ma?",ja:"ここでパソコンの充電はできますか？",k:["充电","电脑"]},
+      {zh:"我们在这儿等一下吧。",py:"Wǒmen zài zhèr děng yīxià ba.",ja:"ここでちょっと待とう。",k:["等","这儿"]},
+      {zh:"今天的课结束了，好轻松。",py:"Jīntiān de kè jiéshù le, hǎo qīngsōng.",ja:"今日の授業が終わって、気が楽になった。",k:["课","轻松"]},
+    ],
+    departing:[
+      {zh:"吃完了，下午继续加油！",py:"Chī wán le, xiàwǔ jìxù jiāyóu!",ja:"食べ終わった、午後も頑張ろう！",k:["吃完","加油"]},
+      {zh:"休息好了，去上课了。",py:"Xiūxi hǎo le, qù shàngkè le.",ja:"十分休んだ、授業に行こう。",k:["休息","上课"]},
     ],
   },
 };
