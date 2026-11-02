@@ -241,12 +241,6 @@ body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;background:#000000;co
     <!-- τ→ο 補助線 -->
     <line x1="333" y1="74" x2="333" y2="84" stroke="#222222" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"/>
 
-    <!-- 現在地ピン（初期位置は画面外） -->
-    <circle id="pin-ring" cx="-200" cy="-200" r="18" fill="none" stroke="#2cb67d" stroke-width="2" opacity="0.3">
-      <animate attributeName="r" values="18;32;18" dur="2s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
-    </circle>
-    <circle id="pin-dot" cx="-200" cy="-200" r="7" fill="#2cb67d"/>
   </svg>
   </div>
 
@@ -624,7 +618,6 @@ function onPos(p){
   curBld   = nr.bld;
   curState = nr.bld ? detectState(p,nr) : null;
 
-  updatePin(p);
   updateBldHighlight();
   updateBadges();
   updateStartBtn();
@@ -669,14 +662,6 @@ function haversine(la1,lo1,la2,lo2){
 // ============================================================
 // MAP UI
 // ============================================================
-function updatePin(p){
-  const s=g2s(p.coords.latitude,p.coords.longitude);
-  for(const id of["pin-dot","pin-ring"]){
-    document.getElementById(id).setAttribute("cx",s.x.toFixed(1));
-    document.getElementById(id).setAttribute("cy",s.y.toFixed(1));
-  }
-}
-
 function updateBldHighlight(){
   document.querySelectorAll("[data-bid]").forEach(el=>{
     const orig = el.getAttribute("data-orig-stroke") || el.getAttribute("stroke");
