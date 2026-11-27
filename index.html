@@ -403,15 +403,38 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 <body>
 
 <!-- ================================================================
+  ⓪ 参加者ID設定画面
+  ================================================================ -->
+<div id="s-setup" class="screen" style="justify-content:center;padding:40px 20px;">
+  <div style="width:100%;max-width:400px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--radius);padding:28px 24px;">
+    <h2 style="font-size:1rem;font-weight:700;margin-bottom:8px;">参加者IDを設定してください</h2>
+    <p style="font-size:.82rem;color:var(--tx2);margin-bottom:20px;line-height:1.6;">
+      研究データの収集のため、匿名の参加者IDを設定します。<br>
+      イニシャル＋誕生月の数字を組み合わせた形式を推奨します。<br>
+      例：<strong>MK11</strong>（山田花子、11月生まれ）
+    </p>
+    <div style="font-size:.78rem;color:var(--tx2);margin-bottom:6px;">参加者ID（半角英数字、2〜8文字）</div>
+    <input id="pidInput" type="text" maxlength="8" placeholder="例：MK11"
+      autocomplete="off" autocorrect="off" spellcheck="false"
+      style="width:100%;background:var(--sf2);border:1px solid var(--bd);border-radius:var(--radius);
+             color:var(--tx);font-size:1rem;font-family:inherit;padding:10px 12px;margin-bottom:16px;">
+    <button onclick="saveParticipantId()"
+      style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;
+             border-radius:var(--radius);font-size:.9rem;font-weight:700;">設定して始める</button>
+  </div>
+</div>
+
+<!-- ================================================================
   ① HOME SCREEN
   ================================================================ -->
-<div id="s-home" class="screen active">
+<div id="s-home" class="screen">
   <div class="sticky-hd">
     <div class="hd-inner">
       <div>
         <div class="hd-title">SFC 中国語学習</div>
         <div class="hd-sub">今いる場所を選んでください</div>
       </div>
+      <div id="pidBadge" style="font-size:.72rem;color:var(--tx3);background:var(--sf2);border:1px solid var(--bd);border-radius:var(--radius);padding:3px 8px;white-space:nowrap;">ID: —</div>
     </div>
   </div>
   <div class="w">
@@ -872,6 +895,34 @@ const VOCAB = {
 };
 
 /* ================================================================
+   GAS LOG SENDER
+   !! GASをデプロイしたらURLをここに貼り付ける !!
+   ================================================================ */
+const GAS_URL = "";   // ← GASウェブアプリURLをここに貼り付ける
+
+function getParticipantId(){
+  try{ return localStorage.getItem("manual_pid") || ""; }catch{ return ""; }
+}
+function saveParticipantId(){
+  const val = document.getElementById("pidInput").value.trim().toUpperCase();
+  if(val.length < 2){ alert("IDを入力してください（2文字以上）"); return; }
+  try{ localStorage.setItem("manual_pid", val); }catch{}
+  document.getElementById("pidBadge").textContent = "ID: " + val;
+  showScreen("s-home");
+  renderBldList();
+}
+async function sendLog(data){
+  if(!GAS_URL) return;
+  try{
+    await fetch(GAS_URL, {
+      method:"POST",
+      headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify(data)
+    });
+  }catch(e){ /* silent fail */ }
+}
+
+/* ================================================================
    CONSTANTS
    ================================================================ */
 const SL = {approaching:"向かっている",indoor:"建物内",outdoor:"屋外",departing:"出た後",all:"すべて"};
@@ -1147,6 +1198,19 @@ function saveHistory(){
     correct: sess.correct, total: sess.items.length
   });
   try{ localStorage.setItem("sfc_zh_hist", JSON.stringify(h.slice(0,60))); }catch(e){}
+
+  // GASへログ送信
+  sendLog({
+    participant_id: getParticipantId(),
+    condition: "manual",
+    mode: sess.mode,
+    total_items: sess.items.length,
+    correct: sess.correct,
+    accuracy: parseFloat((sess.correct / (sess.items.length || 1)).toFixed(3)),
+    duration_sec: null,
+    timestamp: new Date().toISOString(),
+    session_id: Date.now().toString(36)
+  });
 }
 function getHistory(){
   try{ return JSON.parse(localStorage.getItem("sfc_zh_hist"))||[]; }catch{return [];}
@@ -1321,7 +1385,14 @@ function showScreen(id){
    BOOT
    ================================================================ */
 (function init(){
-  renderBldList();
+  const pid = getParticipantId();
+  if(!pid){
+    showScreen("s-setup");
+  } else {
+    document.getElementById("pidBadge").textContent = "ID: " + pid;
+    showScreen("s-home");
+    renderBldList();
+  }
 })();
 </script>
 </body>
