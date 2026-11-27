@@ -1,10 +1,8 @@
 # SFC 中国語フレーズ学習アプリ
 **SFC Chinese Phrase Learning App**
 
-慶應義塾大学SFCキャンパス内で、現在地に応じた中国語フレーズを学習できるWebアプリ。  
-A location-aware Chinese language learning web app designed for use on the Keio University SFC campus.
-
-🌐 **[Live Demo](https://sfc-chinese-geolocation.netlify.app)**
+慶應義塾大学SFCキャンパス内で、場所に応じた中国語フレーズ・単語を学習できるWebアプリ。  
+A Chinese language learning web app designed for use on the Keio University SFC campus.
 
 ![Status](https://img.shields.io/badge/status-Prototype-orange)
 ![Status](https://img.shields.io/badge/ステージ-実証実験中-orange)
@@ -13,16 +11,30 @@ A location-aware Chinese language learning web app designed for use on the Keio 
 
 ---
 
+## バージョン構成 / Versions
+
+このリポジトリは2つのバージョンを並行開発している。
+
+| バージョン | ブランチ | URL | 状態 |
+|-----------|---------|-----|------|
+| **手動選択版**（現行・推奨） | `main` | [sfc-chinese-geolocation.netlify.app](https://sfc-chinese-geolocation.netlify.app) | 本番稼働中 |
+| **GPS測位版**（開発継続中） | `gps-dev` | [gps-dev--sfc-chinese-geolocation.netlify.app](https://gps-dev--sfc-chinese-geolocation.netlify.app) | 開発中 |
+
+### なぜ手動選択版を作ったか
+
+GPS版の開発中、スマートフォンの屋内GPS精度の限界により、建物判定が安定しない問題が継続して発生した。研究発表に向けて発音練習・フレーズ学習機能を先行して使える状態にするため、2026年11月に手動選択版（`main`）を別途リリースした。GPS版（`gps-dev`）は引き続き精度改善を進め、完成次第 `main` へ統合する予定。
+
+> GPS accuracy limitations on smartphones (especially indoors) caused persistent building-detection instability. To ensure the phrase/vocabulary learning features were usable for research presentation, a manual building-selection version was released in November 2026. The GPS version continues in parallel development on `gps-dev`.
+
+---
+
 ## 現在のステージ / Current Stage
 
 | | |
 |---|---|
-| **ステージ** | 🔬 プロトタイプ（実証実験中） |
+| **ステージ** | プロトタイプ（実証実験中） |
 | **目標** | 研究発表版（v1.0）の完成 |
 | **場所** | 慶應義塾大学 SFCキャンパス |
-
-> このリポジトリは単一ブランチで継続的にアップデートしている。プロトタイプから研究発表版への変遷はコミット履歴で確認可能。  
-> This repository is continuously updated on a single branch. The evolution from prototype to research release can be traced through the commit history.
 
 ---
 
@@ -30,7 +42,7 @@ A location-aware Chinese language learning web app designed for use on the Keio 
 
 ```
 Phase 1 ──────── Phase 2 ──────────── Phase 3
-基盤構築 ✅        精度改善 🔧            研究発表版 🔜
+基盤構築 ✅        精度改善・並行開発 🔧    研究発表版 🔜
 ```
 
 ---
@@ -50,13 +62,13 @@ Phase 1 ──────── Phase 2 ──────────── Ph
 
 ---
 
-### Phase 2 　精度改善 🔧　*現在進行中*
+### Phase 2 　精度改善・並行開発 🔧　*現在進行中*
 
-| 課題 | 詳細 |
-|------|------|
-| 🔧 全建物の座標更新 | Google Maps実測値で推定座標を置き換え |
-| 🔧 マップピンのズレ修正 | `g2s()` GPS→SVGピクセル変換の精度改善 |
-| 🔧 室内GPS対応 | 精度低下時の建物判定ロジックの安定化 |
+| 課題 | 詳細 | ブランチ |
+|------|------|---------|
+| ✅ 手動選択版リリース | GPS精度問題の回避策として並行開発・本番公開 | `main` |
+| 🔧 GPS精度改善 | 全建物の座標更新・室内GPS対応強化 | `gps-dev` |
+| 🔧 マップピンのズレ修正 | `g2s()` GPS→SVGピクセル変換の精度改善 | `gps-dev` |
 
 ---
 
@@ -64,55 +76,45 @@ Phase 1 ──────── Phase 2 ──────────── Ph
 
 | 機能 | 説明 |
 |------|------|
+| 🔜 GPS版と手動版の統合 | GPS精度が十分になり次第 `gps-dev` → `main` に統合 |
 | 🔜 学習履歴の可視化 | フレーズ別の練習回数・達成率を表示 |
 | 🔜 フレーズ拡充 | CLT・TBLT理論に基づくシナリオ追加 |
-| 🔜 マップ改善 | SVG再描画 または Google Maps API 移行の検討 |
-
----
-
-## 概要 / Overview
-
-SFCキャンパス内を歩きながら、いる場所に合った中国語フレーズが自動的に表示される。発音練習機能（Web Speech API）も搭載しており、実際に声に出して学習することができる。
-
-As you walk around the SFC campus, the app automatically displays Chinese phrases relevant to your current location. It also features pronunciation practice powered by the Web Speech API, so you can learn by speaking aloud.
 
 ---
 
 ## 機能 / Features
 
-- **位置連動フレーズ表示** — GPS・QZSSを使い、キャンパス内の建物を検出して場所に合ったフレーズを表示  
-  **Location-aware phrases** — Detects nearby campus buildings via GPS/QZSS and shows contextually relevant phrases
+### 手動選択版（`main`）
 
-- **発音練習** — Web Speech APIによる中国語（普通話）の音声認識で発音を評価  
-  **Pronunciation practice** — Evaluates your Mandarin pronunciation using the Web Speech API (zh-CN)
+- **建物手動選択** — 現在地の建物をタップして選択、フレーズ練習を即座に開始
+- **フレーズ一覧・単語一覧** — 全エリア・エリア別に一覧表示、ブックマーク（★）機能付き
+- **ブックマーク練習** — ★を付けたフレーズ・単語だけを集中練習
+- **間違えたもの練習** — 不正解だったフレーズ・単語のみ再練習
+- **発音練習** — Web Speech API（zh-CN）による音声認識で発音を評価
+- **学習履歴** — 練習したフレーズ・単語の履歴をローカルに保存
 
-- **屋内/屋外判定** — GPS精度と移動状態から屋内・屋外・接近中・離脱中を自動判定  
-  **Indoor/outdoor detection** — Automatically detects whether you're inside, outside, approaching, or leaving a building
+### GPS測位版（`gps-dev`、開発中）
 
-- **学習履歴** — 練習したフレーズの履歴をローカルに保存  
-  **Study history** — Saves your practice history locally in the browser
-
-- **キャンパスマップ** — SVGマップ上に現在地と最寄り建物をリアルタイム表示  
-  **Campus map** — Displays your current location and nearest building on an SVG campus map
+- **GPS/QZSS位置検出** — 現在地を自動検出して近傍建物を判定
+- **SVGキャンパスマップ** — リアルタイムで現在地と最寄り建物を表示
+- **建物ジオフェンシング** — 接近・滞在・離脱を自動判定
 
 ---
 
 ## 対応建物 / Supported Buildings
 
-| 建物名 | 概要 | 座標ステータス |
-|--------|------|---------------|
-| バス停A・B | キャンパス入口 | 推定値 |
-| Μ館（メディアセンター） | 図書館・メディア施設 | 推定値 |
-| Α館 | 本館・学事・ウェルネス | 推定値 |
-| Σ館 | 食堂・購買・コンビニ | 推定値 |
-| 講義棟（κ・ε・ι・ο・λ・Θ） | 各種講義室 | **QZSS実測済み** |
-| τ館 | 大学院棟 | **QZSS実測済み** |
-| Γ館 | 体育館 | 推定値 |
-| βヴィレッジ | 学生寮エリア | 推定値 |
-| 鴨池・学生ラウンジ | ガリバー池・サブウェイ | 推定値 |
-
-「推定値」の建物は今後Google Maps実測値への更新を予定している。  
-Buildings marked "推定値" (estimated) are planned to be updated with accurate Google Maps coordinates.
+| 建物名 | 概要 |
+|--------|------|
+| バス停 | キャンパス入口 |
+| Μ館（メディアセンター） | 図書館・3Dプリンター |
+| Σ館 | 食堂・ラウンジ・コンビニ |
+| 講義棟（κ・ε・ι・ο・λ・θ・Ω） | 各講義室 |
+| α館 | 本館・学事・ウェルネス |
+| サブウェイ | 軽食・テイクアウト |
+| τ館 | 大学院棟 |
+| Δ館 | 研究棟 |
+| Γ館（体育館） | スポーツ・サークル |
+| 鴨池（ガリバー池） | 屋外・休憩スペース |
 
 ---
 
@@ -121,11 +123,10 @@ Buildings marked "推定値" (estimated) are planned to be updated with accurate
 | 項目 | 内容 |
 |------|------|
 | 言語 | HTML / CSS / JavaScript（フレームワークなし） |
-| 位置情報 | `navigator.geolocation` API（QZSS対応） |
-| 距離計算 | Haversine formula |
+| 位置情報 | `navigator.geolocation` API（QZSS対応）※GPS版のみ |
 | 音声認識 | Web Speech API（`zh-CN`） |
 | フォント | Noto Sans JP（Google Fonts） |
-| デザイン | デジタル庁デザインシステム準拠（純黒背景・最小14px） |
+| デザイン | デジタル庁デザインシステム準拠（純黒背景） |
 | ホスティング | Netlify（GitHub連携による自動デプロイ） |
 | データ保存 | `localStorage`（サーバーなし） |
 
@@ -133,48 +134,21 @@ Buildings marked "推定値" (estimated) are planned to be updated with accurate
 
 ---
 
-## GPS・位置検出の仕組み / How Location Detection Works
-
-```
-スマホのGPS/QZSS
-      ↓
-navigator.geolocation.watchPosition()
-      ↓
-Haversine formula で各建物との距離を計算
-      ↓
-最近傍建物が検出半径(r)以内 → 建物を検出
-      ↓
-建物ごとのフレーズを表示
-```
-
-建物座標はQZSS（±3〜4m精度）による現地実測値を一部使用。QZSSは日本の準天頂衛星システムで、日本国内では通常のGPSより高精度な位置情報を提供する。  
-Some building coordinates are based on on-site measurements using QZSS (±3–4m accuracy). QZSS (Quasi-Zenith Satellite System) is Japan's own satellite positioning system, providing higher accuracy than standard GPS within Japan.
-
----
-
 ## 使い方 / How to Use
+
+### 手動選択版（推奨）
+
+1. スマホ・PCでアプリを開く / Open the app on your device
+2. 建物カードから今いる場所を選ぶ / Select your current building from the cards
+3. 状態（向かっている・建物内・屋外・出た後）を選ぶ / Choose your situation
+4. マイクボタンを押して発音練習 / Tap the mic button to practice pronunciation
+
+### GPS測位版
 
 1. スマホでアプリを開く / Open the app on your smartphone
 2. 位置情報の使用を許可する / Allow location access
 3. SFCキャンパス内を歩く / Walk around the SFC campus
-4. 建物に近づくとフレーズが表示される / Phrases appear as you approach buildings
-5. 「フレーズ練習を始める」でマイクを使って発音練習 / Tap "Start Practice" to practice pronunciation
-
-> ⚠️ **注意 / Note**  
-> 位置情報の精度向上のため、スマホの位置情報設定を「高精度」モードにすることが必須。  
-> For best accuracy, set your phone's location mode to "High accuracy" (GPS + Wi-Fi + Cell).
-
----
-
-## アクセス / Access
-
-🌐 **[https://sfc-chinese-geolocation.netlify.app](https://sfc-chinese-geolocation.netlify.app)**
-
-ブラウザでURLを開くだけで動作する。インストール不要。  
-Just open the URL in your browser. No installation required.
-
-> 開発者向け：`sfc_app.html` 単体ファイルで完結している。クローンしてHTTPSサーバー上で動かすこと（位置情報APIはHTTPS必須）。  
-> For developers: the app is a single self-contained file (`sfc_app.html`). Clone the repo and serve it over HTTPS (Geolocation API requires HTTPS).
+4. 建物に近づくとフレーズが自動表示される / Phrases appear automatically as you approach buildings
 
 ---
 
